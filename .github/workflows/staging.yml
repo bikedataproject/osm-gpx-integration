@@ -31,10 +31,10 @@ jobs:
       run: dotnet publish -c release
       working-directory: ./src/BikeDataProject.Integrations.OSM/
     - name: Build OSM Docker image
-      run: docker build . --file Dockerfile --tag bikedataproject/fitbit-integration-osm:staging
+      run: docker build . --file Dockerfile --tag bikedataproject/osm-integration:staging
       working-directory: ./src/BikeDataProject.Integrations.OSM/
     - name: Login to Dock Hub
       run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u xivk --password-stdin
     - name: Publish the image to GitHub packages.
-      run: docker push bikedataproject/fitbit-integration-osm:staging
+      run: docker push bikedataproject/osm-integration:staging
       working-directory: ./src/BikeDataProject.Integrations.OSM/
