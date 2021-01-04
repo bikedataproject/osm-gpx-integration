@@ -1,0 +1,40 @@
+name: staging
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+    - name: Prepare NuGet.Config
+      uses: datamonsters/replace-action@v2
+      with:
+        files: 'NuGet.Config.actions'
+        replacements: '%%username%%=xivk,%%token%%=${{ secrets.PACKAGES_SECRET }}'      
+    - run: mv NuGet.Config.actions NuGet.Config    
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Publish OSM
+      run: dotnet publish -c release
+      working-directory: ./src/BikeDataProject.Integrations.OSM/
+    - name: Build OSM Docker image
+      run: docker build . --file Dockerfile --tag bikedataproject/fitbit-integration-osm:staging
+      working-directory: ./src/BikeDataProject.Integrations.OSM/
+    - name: Login to Dock Hub
+      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u xivk --password-stdin
+    - name: Publish the image to GitHub packages.
+      run: docker push bikedataproject/fitbit-integration-osm:staging
+      working-directory: ./src/BikeDataProject.Integrations.OSM/
