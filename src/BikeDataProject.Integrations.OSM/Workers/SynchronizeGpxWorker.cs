@@ -100,8 +100,7 @@ namespace BikeDataProject.Integrations.OSM.Workers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, $"Unhandled exception while synchronizing GPX track.");
             }
         }
     }

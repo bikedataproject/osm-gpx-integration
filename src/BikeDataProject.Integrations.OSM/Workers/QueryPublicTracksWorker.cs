@@ -122,7 +122,7 @@ namespace BikeDataProject.Integrations.OSM.Workers
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, $"Unhandled exception while querying OSM-API.");
+                _logger.LogError(e, $"Unhandled exception while querying OSM-API.");
             }
         }
     }
