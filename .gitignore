@@ -444,3 +444,8 @@ MigrationBackup/
 # vector tiles.
 **/*.mvt
 **/*.heatmap
+
+# 
+*.shp
+*.dbf
+*.shx

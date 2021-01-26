@@ -9,6 +9,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Integration
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Integrations.OSM.Db", "src\BikeDataProject.Integrations.OSM.Db\BikeDataProject.Integrations.OSM.Db.csproj", "{658943F3-A8DC-48F4-A052-824AA88160F3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{C9826FEF-1957-4005-8393-CB2C8E14361C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Integrations.OSM.Dump", "tools\BikeDataProject.Integrations.OSM.Dump\BikeDataProject.Integrations.OSM.Dump.csproj", "{3543100D-F2EF-4DE5-B557-E2E51179696B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{5D5ABA8D-809F-441A-9B45-D79F54B329E7}"
+ProjectSection(SolutionItems) = preProject
+	.gitignore = .gitignore
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTopologySuite.IO.GPX", "src\NetTopologySuite.IO.GPX\NetTopologySuite.IO.GPX.csproj", "{6BCB5453-DB75-493D-895E-C64192D7F495}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,9 +57,35 @@ Global
 		{658943F3-A8DC-48F4-A052-824AA88160F3}.Release|x64.Build.0 = Release|Any CPU
 		{658943F3-A8DC-48F4-A052-824AA88160F3}.Release|x86.ActiveCfg = Release|Any CPU
 		{658943F3-A8DC-48F4-A052-824AA88160F3}.Release|x86.Build.0 = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|x64.Build.0 = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Debug|x86.Build.0 = Debug|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|x64.ActiveCfg = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|x64.Build.0 = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|x86.ActiveCfg = Release|Any CPU
+		{3543100D-F2EF-4DE5-B557-E2E51179696B}.Release|x86.Build.0 = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|x64.Build.0 = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Debug|x86.Build.0 = Debug|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|x64.ActiveCfg = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|x64.Build.0 = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|x86.ActiveCfg = Release|Any CPU
+		{6BCB5453-DB75-493D-895E-C64192D7F495}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F0200E36-FD59-46FD-A836-8ECC628960CF} = {EA834926-09F5-4EE0-9BFA-1155B3052997}
 		{658943F3-A8DC-48F4-A052-824AA88160F3} = {EA834926-09F5-4EE0-9BFA-1155B3052997}
+		{3543100D-F2EF-4DE5-B557-E2E51179696B} = {C9826FEF-1957-4005-8393-CB2C8E14361C}
+		{6BCB5453-DB75-493D-895E-C64192D7F495} = {EA834926-09F5-4EE0-9BFA-1155B3052997}
 	EndGlobalSection
 EndGlobal
