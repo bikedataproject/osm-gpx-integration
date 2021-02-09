@@ -60,9 +60,12 @@ namespace BikeDataProject.Integrations.OSM.Workers
                 var userPass = await File.ReadAllTextAsync(_configuration["OSM_USER_PASS"]);
                 var client = clientFactory.CreateBasicAuthClient(userName, userPass);
                 
+                // get id to start from if any.
+                var idToStartFrom = _configuration.GetValueOrDefault<int>("start-track-id", -1);
+                
                 // get current synchronization state.
                 var latestPublic = await _db.GetLatestPublic();
-                var latestPublicId = latestPublic?.OsmTrackId ?? -1L;
+                var latestPublicId = latestPublic?.OsmTrackId ?? idToStartFrom;
                 var latestUnknown = await _db.GetLatestUnknown();
                 var latestUnknownId = latestUnknown?.OsmTrackId ?? 0L;
                 
@@ -108,13 +111,13 @@ namespace BikeDataProject.Integrations.OSM.Workers
 
                         latestPublicId = osmId;
                         
-                        _logger.LogInformation($"Found public track: {osmId}");
+                        _logger.LogInformation("Found public track: {osmId}", osmId);
                     }
                     else
                     {
                         await _db.GetOrCreateUnknownTrack(osmId);
                         
-                        _logger.LogInformation($"Assuming private track: {osmId}");
+                        _logger.LogInformation("Assuming private track: {osmId}", osmId);
                     }
 
                     await Task.Delay(_configuration.GetValueOrDefault<int>("query-wait-time", 1000), stoppingToken);
@@ -122,7 +125,7 @@ namespace BikeDataProject.Integrations.OSM.Workers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Unhandled exception while querying OSM-API.");
+                _logger.LogError(e, "Unhandled exception while querying OSM-API");
             }
         }
     }
