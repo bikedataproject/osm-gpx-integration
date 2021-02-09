@@ -36,7 +36,7 @@ namespace BikeDataProject.Integrations.OSM.Workers
                 _logger.LogDebug("{worker} running at: {time}, triggered every {refreshTime}", 
                     nameof(QueryPublicTracksWorker), DateTimeOffset.Now, _configuration.GetValueOrDefault<int>("refresh-time-gpx", 1000));
 
-                var doSync = _configuration.GetValueOrDefault("QUERY_TRACKS", true);
+                var doSync = _configuration.GetValueOrDefault("SYNC_GPX", true);
                 if (!doSync)
                 {
                     await Task.Delay(_configuration.GetValueOrDefault<int>("refresh-time-gpx", 1000), stoppingToken);
