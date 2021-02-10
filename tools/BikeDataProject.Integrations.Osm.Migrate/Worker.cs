@@ -117,6 +117,7 @@ namespace BikeDataProject.Integrations.Osm.Migrate
             catch (Exception e)
             {
                 _logger.LogError(e, "Unhandled exception exporting GPX tracks");
+                throw;
             }
         }
     }
