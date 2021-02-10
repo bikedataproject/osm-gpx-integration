@@ -76,5 +76,10 @@ namespace BikeDataProject.Integrations.OSM.Db
         /// The gpx content type.
         /// </summary>
         public string? GpxContentType { get; set; }
+
+        public override string ToString()
+        {
+            return $"Track[{this.Id}] OsmId:{this.OsmTrackId}, UserId: {this.UserId}";
+        }
     }
 }
