@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using BikeDataProject.Integrations.OSM.Db;
 using FlatGeobuf.NTS;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
@@ -18,37 +18,34 @@ using NetTopologySuite.IO;
 
 namespace BikeDataProject.Integrations.OSM.Dump
 {
-    public class Worker : BackgroundService
+    public class DumpTracksWorker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IConfiguration _configuration;
-        private readonly OsmDbContext _db;
+        private readonly ILogger<DumpTracksWorker> _logger;
 
-        public Worker(ILogger<Worker> logger, IConfiguration configuration,
-            OsmDbContext db)
+        private static readonly string RefreshTimeConfig = "refresh-time";
+        
+        public DumpTracksWorker(IServiceProvider serviceProvider, ILoggerFactory loggerFactory, 
+            IConfiguration configuration)
         {
-            _logger = logger;
+            _serviceProvider = serviceProvider;
             _configuration = configuration;
-            _db = db;
+            
+            _logger = loggerFactory.CreateLogger<DumpTracksWorker>();
         }
         
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await this.RunAsync(stoppingToken);
             
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogDebug("{worker} running at: {time}, triggered every {refreshTime}", 
-                    nameof(Worker), DateTimeOffset.Now, _configuration.GetValueOrDefault<int>("refresh-time-gpx", 1000));
-
-                var doSync = _configuration.GetValueOrDefault("QUERY_TRACKS", true);
-                if (!doSync)
-                {
-                    await Task.Delay(_configuration.GetValueOrDefault<int>("refresh-time-gpx", 1000), stoppingToken);
-                    continue;
-                }
+                    nameof(DumpTracksWorker), DateTimeOffset.Now, _configuration.GetValueOrDefault<int>(RefreshTimeConfig, 1000));
                 
-                await Task.Delay(_configuration.GetValueOrDefault<int>("refresh-time-gpx", 1000), stoppingToken);
+                await this.RunAsync(stoppingToken);
+                
+                await Task.Delay(_configuration.GetValueOrDefault<int>(RefreshTimeConfig, 1000), stoppingToken);
             }
         }
 
@@ -56,10 +53,14 @@ namespace BikeDataProject.Integrations.OSM.Dump
         {
             try
             {
+                using var scope = _serviceProvider.CreateScope();
+                var db = scope.ServiceProvider
+                    .GetRequiredService<OsmDbContext>();
+                
                 IEnumerable<Feature> GetFeatures()
                 {
                     var maxTrackCount = _configuration.GetValueOrDefault("MaxFeatures", int.MaxValue);
-                    var tracks = _db.Tracks.Where(x => x.Id < maxTrackCount)
+                    var tracks = db.Tracks.Where(x => x.Id < maxTrackCount)
                         .Where(x => x.UserId != null).OrderBy(x => x.Id);
 
                     var trackCount = 0;
@@ -69,7 +70,8 @@ namespace BikeDataProject.Integrations.OSM.Dump
                         if (track.GpxFile == null) continue;
 
                         _logger.LogInformation(
-                            $"Track {trackCount + 1}/{maxTrackCount} {track.Id}: {track.GpxFile?.Length} bytes");
+                            "Track {trackCount}/{maxTrackCount} {trackId}: {trackLength} bytes",
+                            trackCount + 1, maxTrackCount, track.Id, track.GpxFile?.Length);
 
                         // try compressed.
                         string? xml = null;
@@ -155,14 +157,14 @@ namespace BikeDataProject.Integrations.OSM.Dump
 
                 var outputFile = this._configuration.GetValueOrDefault("OutputFile", "osm-gpx.fbg");
                 _logger.LogDebug("Building output file: {outputFile}", outputFile);
-                using var outputFileStream = File.Open(outputFile, FileMode.Create);
+                await using var outputFileStream = File.Open(outputFile, FileMode.Create);
                 FeatureCollectionConversions.Serialize(outputFileStream, GetFeatures(), FlatGeobuf.GeometryType.LineString);
                 
                 _logger.LogInformation("Built output file: {outputFile}", outputFile);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Unhandled exception exporting GPX tracks");
+                _logger.LogError(e, "Unhandled exception exporting GPX tracks");
             }
         }
     }

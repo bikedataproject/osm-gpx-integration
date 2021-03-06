@@ -27,14 +27,27 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Login to Dock Hub
+      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u xivk --password-stdin
+
     - name: Publish OSM
       run: dotnet publish -c release
       working-directory: ./src/BikeDataProject.Integrations.OSM/
     - name: Build OSM Docker image
-      run: docker build . --file Dockerfile --tag bikedataproject/osm-integration:staging
+      run: docker build . --file Dockerfile --tag bikedataproject/osm-integration:staging --tag bikedataproject/osm-integration:staging-0.$GITHUB_RUN_NUMBER
       working-directory: ./src/BikeDataProject.Integrations.OSM/
-    - name: Login to Dock Hub
-      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u xivk --password-stdin
     - name: Publish the image to GitHub packages.
       run: docker push bikedataproject/osm-integration:staging
-      working-directory: ./src/BikeDataProject.Integrations.OSM/
+    - name: Publish the image to GitHub packages.
+      run: docker push bikedataproject/osm-integration:staging-0.$GITHUB_RUN_NUMBER
+      
+    - name: Publish OSM
+      run: dotnet publish -c release
+      working-directory: ./src/BikeDataProject.Integrations.OSM.Dump/
+    - name: Build OSM Docker image
+      run: docker build . --file Dockerfile --tag bikedataproject/osm-integration-dump:staging --tag bikedataproject/osm-integration-dump:staging-0.$GITHUB_RUN_NUMBER
+      working-directory: ./src/BikeDataProject.Integrations.OSM.Dump/
+    - name: Publish the image to GitHub packages.
+      run: docker push bikedataproject/osm-integration-dump:staging
+    - name: Publish the image to GitHub packages.
+      run: docker push bikedataproject/osm-integration-dump:staging-0.$GITHUB_RUN_NUMBER

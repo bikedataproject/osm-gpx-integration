@@ -37,7 +37,7 @@ namespace BikeDataProject.Integrations.OSM.Dump
                     var host = Host.CreateDefaultBuilder(args)
                         .ConfigureAppConfiguration((hostingContext, config) =>
                         {
-                            Log.Information($"Env: {hostingContext.HostingEnvironment.EnvironmentName}");
+                            Log.Information("Env: {env}", hostingContext.HostingEnvironment.EnvironmentName);
                             
                             config.AddJsonFile(deployTimeSettings, true, true);
                             config.AddEnvironmentVariables((c) => { c.Prefix = envVarPrefix; });
@@ -57,7 +57,7 @@ namespace BikeDataProject.Integrations.OSM.Dump
                             services.AddDbContext<OsmDbContext>(o => o.UseNpgsql(fitbitDbString),
                                 ServiceLifetime.Transient, ServiceLifetime.Singleton);
                             
-                            services.AddHostedService<Worker>();
+                            services.AddHostedService<DumpTracksWorker>();
                         }).Build();
 
                     // run!
