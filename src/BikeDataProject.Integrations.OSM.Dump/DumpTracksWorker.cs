@@ -155,12 +155,20 @@ namespace BikeDataProject.Integrations.OSM.Dump
                     }
                 }
 
-                var outputFile = this._configuration.GetValueOrDefault("OutputFile", "osm-gpx.fbg");
-                _logger.LogDebug("Building output file: {outputFile}", outputFile);
-                await using var outputFileStream = File.Open(outputFile, FileMode.Create);
+                var outputFileInfo = new FileInfo(
+                    this._configuration.GetValueOrDefault("OutputFile", "osm-gpx.fbg"));
+                var tempOutputFile = Path.Combine(outputFileInfo.Directory.FullName, ".osm-gpx.fbg.part");
+                
+                _logger.LogDebug("Building output file: {tempOutputFile}", tempOutputFile);
+                await using var outputFileStream = File.Open(tempOutputFile, FileMode.Create);
                 FeatureCollectionConversions.Serialize(outputFileStream, GetFeatures(), FlatGeobuf.GeometryType.LineString);
                 
-                _logger.LogInformation("Built output file: {outputFile}", outputFile);
+                if (outputFileInfo.Exists) outputFileInfo.Delete();
+                File.Move(tempOutputFile, outputFileInfo.FullName);
+                _logger.LogDebug("Moved output file: {tempOutputFile}->{outputFile}", 
+                    tempOutputFile, outputFileInfo.FullName);
+                
+                _logger.LogInformation("Built output file: {outputFile}", outputFileInfo.FullName);
             }
             catch (Exception e)
             {
