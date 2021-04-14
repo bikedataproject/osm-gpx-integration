@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using BikeDataProject.Integrations.OSM.Db;
+using FlatGeobuf;
 using FlatGeobuf.NTS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using Feature = NetTopologySuite.Features.Feature;
 
 namespace BikeDataProject.Integrations.OSM.Dump
 {
@@ -72,6 +74,18 @@ namespace BikeDataProject.Integrations.OSM.Dump
                         _logger.LogInformation(
                             "Track {trackCount}/{maxTrackCount} {trackId}: {trackLength} bytes",
                             trackCount + 1, maxTrackCount, track.Id, track.GpxFile?.Length);
+                        
+                        
+                        // build attributes
+                        var attributes = new AttributesTable()
+                        {
+                            {"bdp_id", track.Id},
+                            {"track_id", track.OsmTrackId},
+                            {"user_id", track.UserId ?? -1},
+                            {"file_name", track.GpxFileName ?? string.Empty},
+                            {"timestamp", (track.OsmTimeStamp ?? DateTime.UnixEpoch).ToUnixTime()},
+                            {"tags", string.Join(',', track.Tags ?? Array.Empty<string>())}
+                        };
 
                         // try compressed.
                         string? xml = null;
@@ -130,20 +144,14 @@ namespace BikeDataProject.Integrations.OSM.Dump
                                     foreach (var g in mls) {
                                         if (g is LineString ls) {
                                             if (ls.Count >= 2) {
-                                                yield return new Feature(ls, new AttributesTable()
-                                                {
-                                                    {"track_id", track.Id}
-                                                });
+                                                yield return new Feature(ls, attributes);
                                             }
                                         }
                                     }
                                 }
                                 else if (tf.Geometry is LineString ls) {
                                     if (ls.Count >= 2) {
-                                        yield return new Feature(tf.Geometry, new AttributesTable()
-                                        {
-                                            {"track_id", track.Id}
-                                        });
+                                        yield return new Feature(tf.Geometry, attributes);
                                     }
                                 }
                             }
@@ -161,7 +169,40 @@ namespace BikeDataProject.Integrations.OSM.Dump
                 
                 _logger.LogDebug("Building output file: {tempOutputFile}", tempOutputFile);
                 await using var outputFileStream = File.Open(tempOutputFile, FileMode.Create);
-                FeatureCollectionConversions.Serialize(outputFileStream, GetFeatures(), FlatGeobuf.GeometryType.LineString);
+                FeatureCollectionConversions.Serialize(outputFileStream, GetFeatures(), FlatGeobuf.GeometryType.LineString,
+                    columns: new []
+                    {
+                        new ColumnMeta()
+                        {
+                            Name = "bdp_id",
+                            Type = ColumnType.Long
+                        },
+                        new ColumnMeta()
+                        {
+                            Name = "track_id",
+                            Type = ColumnType.Long
+                        },
+                        new ColumnMeta()
+                        {
+                            Name = "user_id",
+                            Type = ColumnType.Int
+                        },
+                        new ColumnMeta()
+                        {
+                            Name = "file_name",
+                            Type = ColumnType.String
+                        },
+                        new ColumnMeta()
+                        {
+                            Name = "timestamp",
+                            Type = ColumnType.Long
+                        },
+                        new ColumnMeta()
+                        {
+                            Name = "tags",
+                            Type = ColumnType.String
+                        }
+                    }.ToList());
                 
                 if (outputFileInfo.Exists) outputFileInfo.Delete();
                 File.Move(tempOutputFile, outputFileInfo.FullName);
